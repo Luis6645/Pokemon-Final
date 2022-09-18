@@ -14,4 +14,20 @@ const localFavorites = (id: number) => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
 }
 
-export default { localFavorites };
+const existInFavorites = (id: number): boolean => {
+
+    if (typeof window === 'undefined') return false;
+
+    let favorites: number[] = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+
+    return favorites.includes(id);
+}
+
+const pokemons = (): number[] => {
+
+    return JSON.parse(localStorage.getItem('favorites') || '[]');
+}
+
+
+export default { existInFavorites, localFavorites, pokemons };
