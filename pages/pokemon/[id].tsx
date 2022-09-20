@@ -113,7 +113,8 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
 
     return {
         paths,
-        fallback: false,
+        //fallback: false //Indicamos que si trata de ingresar a un url que no está entre los paths, o sea no está previamente renderizado, entonces que tire un 404
+        fallback: 'blocking',
     };
 }
 
@@ -121,10 +122,25 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
     const { id } = params as { id: string };
 
+    const pokemon = await getPokemonInfo(id);
+
+    if (!pokemon) {
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false
+                //'false' porque si la persona busca un pokemon con un id que no esta ya generado, puede que exista ya o que en un futuro exista
+                //Y si colocamos 'true' entonces la redireccion a otra pagina la eliminará del indice porque quiere decir que ya no existe, que ya nunca mas vamos a volver entrar ahi
+            }
+        }
+    }
+
     return {
         props: {
-            pokemon: await getPokemonInfo(id)
-        }
+            pokemon
+        },
+        revalidate: 86400, //Le decimos que revalide la página cada 86480s (24h), a esto se le llama ISR (Incremental static regeneration)
+        //Esto en cuanto necesitemos que la data se actualice cada cierto tiempo
     }
 }
 
